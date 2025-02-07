@@ -1,5 +1,4 @@
 const express = require('express');
-const functions = require('firebase-functions');
 const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
@@ -42,8 +41,5 @@ app.use('/api-docs', docsRoutes);
 app.use('/api/v1', signinRoutes);
 
 app.use('/upload', express.static(path.join(__dirname, 'upload')));
-// app.use('/api/trips', tripRoutes);
-// app.use('/api/settings', settingsRoutes);
-// app.use('/api/loads', loadRoutes);
-exports.api = functions.https.onRequest(app);
+
 module.exports = app;
