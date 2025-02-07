@@ -1,0 +1,3592 @@
+openapi: 3.0.0
+info:
+  title: API Documentation
+  version: 1.0.0
+  description: Comprehensive API documentation with categorized endpoints
+
+tags:
+  - name: Broker
+    description: Operations related to broker management
+  - name: Facility
+    description: Operations related to facility management
+  - name: Carrier
+    description: Operations related to carrier management
+  - name: Driver
+    description: Operations related to driver management
+  - name: Truck
+    description: Operations related to truck management
+  - name: Trailer
+    description: Operations related to trailer management    
+  - name: Warehouse
+    description: Operations related to swarehouse management
+  - name: Owner
+    description: Operations related to owner management
+  - name: Filter
+    description: Operations related to filter management
+  - name: Shortlist
+    description: Operations related to retrieving and managing shortlists
+
+paths:
+  /api/v1/brokers:
+    get:
+      tags:
+        - Broker
+      summary: >
+        Retrieve brokers.
+      
+      description: |
+        Fetch a list of brokers using various filtering options to narrow down results.<br>
+        Supported operations for all query parameters:<br>
+          ["Is", "Is not", "Contains", "Does not contain", "Starts with", "Ends with", "Is empty", "Is not empty"]
+      parameters:
+        - in: query
+          name: name
+          schema:
+            type: string
+          description: >
+            JSON string to filter by brokerage company name. Example: {"property":"Contains","value":"Vuiton"}
+        - in: query
+          name: mc
+          schema:
+            type: string
+          description: >
+            JSON string to filter by MC number. Example: {"property":"Is","value":"439799"}
+        - in: query
+          name: broker_name
+          schema:
+            type: string
+          description: >
+            JSON string to filter by broker name. Example: {"property":"Contains","value":"John Doe"}
+      responses:
+        '200':
+          description: Successful retrieval of brokers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BrokerPage'
+        '400':
+          description: Invalid parameter format
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Invalid parameter format"
+        '500':
+          description: Error retrieving brokers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Error retrieving brokers"
+
+  /api/v1/broker:
+    post:
+      tags:
+        - Broker
+      summary: Create broker
+      description: |
+        Add a new broker to the system with detailed information such as name, contact, and MC number.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BrokerPage'
+      responses:
+        '200':
+          description: Broker created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    $ref: '#/components/schemas/BrokerPage'
+        '500':
+          description: Error creating broker
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Error creating broker"
+
+  /api/v1/broker/{id}:
+    get:
+      tags:
+        - Broker
+      summary: Retrieve broker by ID
+      description: |
+        Access detailed information for a specific broker by providing their unique broker ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Broker found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    $ref: '#/components/schemas/BrokerPage'
+        '404':
+          description: Broker not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Broker not found"
+    put:
+      tags:
+        - Broker
+      summary: Update a broker by ID
+      description: |
+        Modify the details of an existing broker using their broker ID and updated information.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BrokerPage'
+      responses:
+        '200':
+          description: Broker updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    $ref: '#/components/schemas/BrokerPage'
+        '404':
+          description: Broker not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Broker not found"
+
+    delete:
+      tags:
+        - Broker
+      summary: Delete a broker by ID
+      description: |
+        Remove a broker from the system using their unique broker ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Broker deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: object
+                    properties:
+                      deleted_id:
+                        type: string
+        '404':
+          description: Broker not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Broker not found"
+
+  /api/v1/broker/{id}/reviews:
+    get:
+      tags:
+        - Broker
+      summary: Retrieve reviews for broker
+      description: |
+        Collect all reviews associated with a particular broker by broker ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the broker page
+      responses:
+        '200':
+          description: Successful retrieval of reviews
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Review'
+        '404':
+          description: Broker page not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Broker page not found"
+        '500':
+          description: Error retrieving reviews
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Error retrieving reviews"
+
+  /api/v1/broker/{id}/review:
+    post:
+      tags:
+        - Broker
+      summary: Add review to broker
+      description: |
+        Submit a new review or comment for a specific broker, enhancing user feedback and ratings.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the broker page
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Review'
+      responses:
+        '200':
+          description: Review added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Review'
+        '404':
+          description: Broker page not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Broker page not found"
+        '500':
+          description: Error adding review
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Error adding review"
+
+  /api/v1/broker/{id}/review/{reviewId}:
+    put:
+      tags:
+        - Broker
+      summary: Update review for broker
+      description: |
+        Modify an existing review or comment for a broker using broker ID and review ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the broker page
+        - name: reviewId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the review to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Review'
+      responses:
+        '200':
+          description: Review updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    $ref: '#/components/schemas/Review'
+        '404':
+          description: Broker or review not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Broker or review not found"
+        '500':
+          description: Error updating review
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Error updating review"
+
+    delete:
+      tags:
+        - Broker
+      summary: Delete review from broker
+      description: |
+        Remove a specific review or comment from a broker’s profile using broker and review IDs.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the broker page
+        - name: reviewId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the review to delete
+      responses:
+        '200':
+          description: Review deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: string
+                    example: "Review deleted successfully"
+        '404':
+          description: Broker or review not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Broker or review not found"
+        '500':
+          description: Error deleting review
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Error deleting review"
+
+    delete:
+      tags:
+        - Broker
+      summary: Delete a review from a broker page
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the broker page
+        - name: reviewId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the review to delete
+      responses:
+        '200':
+          description: Review deleted successfully
+        '404':
+          description: Broker page or review not found
+        '500':
+          description: Error deleting review
+  /api/v1/facilities:
+    get:
+      tags:
+        - Facility
+      summary: >
+        Retrieve facilities
+      description: |
+        Obtain a list of facilities with options to filter by attributes such as name and address.<br>
+        Supported operations for all query parameters:<br>
+        ["Is", "Is not", "Contains", "Does not contain", "Starts with", "Ends with", "Is empty", "Is not empty"]
+      parameters:
+        - in: query
+          name: name
+          schema:
+            type: string
+          description: >
+            JSON string to filter by facility name. Example: {"property":"Contains","value":"Main Facility"}
+        - in: query
+          name: address
+          schema:
+            type: string
+          description: >
+            JSON string to filter by facility address. Example: {"property":"Contains","value":"1234 Main St, City, State, Zip"}
+        - in: query
+          name: workingHours
+          schema:
+            type: string
+          description: >
+            JSON string to filter by working hours. Example: {"property":"Ends with","value":"5 PM"}
+        - in: query
+          name: contactName
+          schema:
+            type: string
+          description: >
+            JSON string to filter by contact name in contacts. Example: {"property":"Contains","value":"John Doe"}
+        - in: query
+          name: contactPhone
+          schema:
+            type: string
+          description: >
+            JSON string to filter by contact phone number in contacts. Example: {"property":"Is","value":"123-456-7890"}
+        - in: query
+          name: contactEmail
+          schema:
+            type: string
+          description: >
+            JSON string to filter by contact email in contacts. Example: {"property":"Ends with","value":"@example.com"}
+      responses:
+        '200':
+          description: Successful retrieval of facilities
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Facility'
+        '400':
+          description: Invalid parameter format
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Invalid parameter format"
+        '500':
+          description: Error retrieving facilities
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Error message"
+  /api/v1/facility/:
+    post:
+      tags:
+        - Facility
+      summary: Create facility
+      description: |
+        Establish a new facility record with comprehensive details including location and contact information.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Facility'
+      responses:
+        '200':
+          description: Facility created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    $ref: '#/components/schemas/Facility'
+        '500':
+          description: Error creating facility
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Error message"
+
+  /api/v1/facility/{id}:
+    get:
+      tags:
+        - Facility
+      summary: Retrieve facility by ID
+      description: |
+        Gain access to detailed facility information by specifying the facility ID.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Facility found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    $ref: '#/components/schemas/Facility'
+        '404':
+          description: Facility not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Facility not found"
+
+    put:
+      tags:
+        - Facility
+      summary: Update facility by ID
+      description: |
+        Revise facility details using the facility ID to ensure up-to-date information on record.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Facility'
+      responses:
+        '200':
+          description: Facility updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    $ref: '#/components/schemas/Facility'
+        '404':
+          description: Facility not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Facility not found"
+
+    delete:
+      tags:
+        - Facility
+      summary: Delete facility by ID
+      description: |
+        Eliminate a facility from the database by using its unique ID.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Facility deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: object
+                    properties:
+                      deleted_id:
+                        type: string
+        '404':
+          description: Facility not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Facility not found"
+
+  /api/v1/facility/{id}/googleReviews:
+    get:
+      tags:
+        - Facility
+      summary: Retrieve Google reviews for facility
+      description: |
+        Fetch Google reviews associated with a facility to better understand external feedback.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the facility
+      responses:
+        '200':
+          description: Successful retrieval of google reviews
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Review'
+        '404':
+          description: Facility not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Facility not found"
+
+  /api/v1/facility/{id}/ourComments:
+    get:
+      tags:
+        - Facility
+      summary: Retrieve internal comments for facility
+      description: |
+        Access internal comments and notes for a facility, enhancing internal communication and record-keeping.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the facility
+      responses:
+        '200':
+          description: Successful retrieval of our comments
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Review'
+        '404':
+          description: Facility not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Facility not found"
+
+  /api/v1/facility/{id}/ourComment:
+    post:
+      tags:
+        - Facility
+      summary: Add internal comment to facility
+      description: |
+        Submit a new internal comment or note related to a facility for improved documentation.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the facility
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Review'
+      responses:
+        '200':
+          description: Comment added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Review'
+        '404':
+          description: Facility not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Facility not found"
+
+  /api/v1/facility/{id}/ourComment/{commentId}:
+    put:
+      tags:
+        - Facility
+      summary: Update internal comment for facility
+      description: |
+        Edit an existing internal comment or note for a facility using facility and comment IDs.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the facility
+        - name: commentId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the comment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Review'
+      responses:
+        '200':
+          description: Comment updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    $ref: '#/components/schemas/Review'
+        '404':
+          description: Facility or comment not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Facility or comment not found"
+
+    delete:
+      tags:
+        - Facility
+      summary: Delete internal comment from facility
+      description: |
+        Remove an internal comment or note from a facility record using the facility and comment IDs.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the facility
+        - name: commentId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the comment
+      responses:
+        '200':
+          description: Comment deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: string
+                    example: "Comment deleted successfully"
+        '404':
+          description: Facility or comment not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Facility or comment not found"
+  /api/v1/carriers:
+    get:
+      tags:
+        - Carrier
+      summary: >
+        Retrieve carriers
+      description: |
+        Collect a list of carriers using various filters to refine the selection based on requirements.<br>      
+        Supported operations for all query parameters:<br>
+        ["Is", "Is not", "Contains", "Does not contain", "Starts with", "Ends with", "Is empty", "Is not empty"]<br>
+        <br>
+        Indexes for status field: <br>
+        ["Active"=1, "Suspended", "Inactive"]
+      parameters:
+        - in: query
+          name: owner
+          schema:
+            type: string
+          description: >
+            JSON string to filter by owner name. Example: {"property":"Contains","value":"John Doe"}
+        - in: query
+          name: status
+          schema:
+            type: string
+          description: >
+            JSON string to filter by carrier status. Example: {"property":"Is","value":1}
+        - in: query
+          name: name
+          schema:
+            type: string
+          description: >
+            JSON string to filter by carrier name. Example: {"property":"Starts with","value":"CarrierCo"}
+        - in: query
+          name: mc
+          schema:
+            type: string
+          description: >
+            JSON string to filter by MC number. Example: {"property":"Is","value":"123456"}
+        - in: query
+          name: trucks
+          schema:
+            type: string
+          description: >
+            JSON string to filter by trucks list. Example: {"property":"Contains","value":"Truck123"}
+        - in: query
+          name: trailers
+          schema:
+            type: string
+          description: >
+            JSON string to filter by trailers list. Example: {"property":"Does not contain","value":"Trailer456"}
+        - in: query
+          name: packet
+          schema:
+            type: string
+          description: >
+            JSON string to filter by document names in carrierPacket. Example: {"property":"Ends with","value":".pdf"}
+      responses:
+        '200':
+          description: Successful retrieval of carriers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Carrier'
+        '400':
+          description: Invalid parameter format
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Invalid parameter format"
+        '500':
+          description: Error retrieving carriers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Error message"
+  /api/v1/carrier:        
+    post:
+      tags:
+        - Carrier
+      summary: Create carrier
+      description: |
+        Register a new carrier in the system by providing detailed information including carrier's documentation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Carrier'
+      responses:
+        '200':
+          description: Carrier created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    $ref: '#/components/schemas/Carrier'
+        '500':
+          description: Error creating carrier
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Error message"
+
+  /api/v1/carrier/{id}:
+    get:
+      tags:
+        - Carrier
+      summary: Retrieve carrier by ID
+      description: |
+        Access carrier information by specifying the carrier's unique ID for detailed records.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Carrier found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    $ref: '#/components/schemas/Carrier'
+        '404':
+          description: Carrier not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Carrier not found"
+
+    put:
+      tags:
+        - Carrier
+      summary: Update carrier by ID
+      description: |
+        Update carrier data using the unique carrier ID to ensure records reflect current information.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Carrier'
+      responses:
+        '200':
+          description: Carrier updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    $ref: '#/components/schemas/Carrier'
+        '404':
+          description: Carrier not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Carrier not found"
+    
+    delete:
+      tags:
+        - Carrier
+      summary: Delete carrier by ID
+      description: |
+        Delete a carrier from the system by providing the carrier's ID for accurate record management.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Carrier deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: object
+                    properties:
+                      deleted_id:
+                        type: string
+        '404':
+          description: Carrier not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Carrier not found"
+
+  /api/v1/drivers:
+    get:
+      tags:
+        - Driver
+      summary: >
+        Retrieve drivers
+      description: |
+        Acquire a list of drivers with the ability to apply extensive filters to pinpoint specific attributes.<br><br>
+        Supported operations for all query parameters:<br>
+        ["Is", "Is not", "Contains", "Does not contain", "Starts with", "Ends with", "Is empty", "Is not empty"]<br>      
+        Indexes for status field: <br>
+        ["Active"=1, "On vacation", "Inactive"]<br><br>
+        Indexes for type field: <br>
+        ["SSolo"=1, "Team", "ELD", "Local", "Outside"]<br><br>
+        Indexes for endorsements field: <br>
+        ["(S) School Bus/Passenger Transport"=1, "(T) Double/Triples", "(N) Tank Vehicle", "(X) Tanker and Hazardous Materials", "(H) Hazardous Materials (HAZMAT)", "(P) Passenger Transport"]
+      parameters:
+        - in: query
+          name: name
+          schema:
+            type: string
+          description: >
+            JSON string to filter by driver's full name. Example: {"property":"Contains","value":"John Doe"}
+        - in: query
+          name: carrier
+          schema:
+            type: string
+          description: >
+            JSON string to filter by carrier ID. Example: {"property":"Is","value":"12345"}
+        - in: query
+          name: status
+          schema:
+            type: string
+          description: >
+            JSON string to filter by driver's status. Example: {"property":"Is","value":1}
+        - in: query
+          name: type
+          schema:
+            type: string
+          description: >
+            JSON string to filter by driver's type. Example: {"property":"Is","value":"Full-Time"}
+        - in: query
+          name: endorsements
+          schema:
+            type: string
+          description: >
+            JSON string to filter by CDL endorsements. Example: {"property":"Contains","value":1}
+        - in: query
+          name: address
+          schema:
+            type: string
+          description: >
+            JSON string to filter by address. Example: {"property":"Starts with","value":"1234 Main St"}
+        - in: query
+          name: cellPhone
+          schema:
+            type: string
+          description: >
+            JSON string to filter by cell phone number. Example: {"property":"Is","value":"123-456-7890"}
+        - in: query
+          name: trackingPhone
+          schema:
+            type: string
+          description: >
+            JSON string to filter by tracking phone number. Example: {"property":"Ends with","value":"7890"}
+        - in: query
+          name: document
+          schema:
+            type: string
+          description: >
+            JSON string to filter by document names in driver's documents. Example: {"property":"Contains","value":".pdf"}
+      responses:
+        '200':
+          description: Successful retrieval of drivers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Driver'
+        '400':
+          description: Invalid parameter format
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Invalid parameter format"
+        '500':
+          description: Error retrieving drivers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Error retrieving drivers"
+    put:
+      tags:
+        - Driver
+      summary: >
+        Update multiple drivers
+      description: Updates multiple drivers. Expects an array of driver objects with their respective IDs and new data.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  fullName:
+                    type: string
+                  address:
+                    type: string
+                  status:
+                    type: number
+                  truck:
+                    type: array
+                    items:
+                      type: string
+                  carrierId:
+                    type: string
+                  contacts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ContactInfo'
+                  type:
+                    type: number
+                  email:
+                    type: string
+                  documents:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Document'
+                  date:
+                    type: string
+                    format: date
+                  notes:
+                    type: string
+                  endorsements:
+                    type: array
+                    items:
+                      type: number
+                  cellPhone:
+                    type: string
+                  trackingPhone:
+                    type: string
+      responses:
+        '200':
+          description: Drivers updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: "Drivers updated successfully"
+                      updated_drivers:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Driver'
+        '404':
+          description: One or more drivers not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: "Some drivers were not found"
+                      not_found_ids:
+                        type: array
+                        items:
+                          type: string
+                      updated_drivers:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Driver'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Error updating drivers"
+  /api/v1/driver:
+    post:
+      tags:
+        - Driver
+      summary: Create driver
+      description: |
+        Add a new driver to the system by providing all necessary credentials and identification details.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Driver'
+      responses:
+        '200':
+          description: Driver created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    $ref: '#/components/schemas/Driver'
+        '500':
+          description: Error creating driver
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Error creating driver" 
+  /api/v1/driver/{id}:
+    get:
+      tags:
+        - Driver
+      summary: Retrieve driver by ID
+      description: |
+        Obtain driver details by specifying the driver's unique ID to access personal and professional data.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Driver found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    $ref: '#/components/schemas/Driver'
+        '404':
+          description: Driver not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Driver not found"
+
+    delete:
+      tags:
+        - Driver
+      summary: Delete driver by ID
+      description: |
+        Remove a driver record from the database by using the driver's unique ID for precise data management.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Driver deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: object
+                    properties:
+                      deleted_id:
+                        type: string
+        '404':
+          description: Driver not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Driver not found"
+
+  /api/v1/trucks:
+    get:
+      tags:
+        - Truck
+      summary: >
+        Retrieve trucks
+      description: |
+        Retrieve a list of trucks with filtering capabilities to manage and maintain fleet operations.<br><br>
+        Supported operations for all query parameters:<br>
+        ["Is", "Is not", "Contains", "Does not contain", "Starts with", "Ends with", "Is empty", "Is not empty"]<br><br>
+        Indexes for status<br>
+        ["Active"=1, "Suspended", "Inactive"]<br><br>
+        Indexes for type<br>
+        ["Full trip"=1, "Local", "Outside"]
+      parameters:
+        - in: query
+          name: truckNo
+          schema:
+            type: string
+          description: >
+            JSON string to filter by truck number. Example: {"property":"Contains","value":"1234"}
+        - in: query
+          name: carrier
+          schema:
+            type: string
+          description: >
+            JSON string to filter by carrier ID. Example: {"property":"Is","value":"5678"}
+        - in: query
+          name: driver
+          schema:
+            type: string
+          description: >
+            JSON string to filter by driver ID. Example: {"property":"Is","value":"9012"}
+        - in: query
+          name: status
+          schema:
+            type: string
+          description: >
+            JSON string to filter by truck status. Example: {"property":"Is","value":1}
+        - in: query
+          name: type
+          schema:
+            type: string
+          description: >
+            JSON string to filter by truck type. Example: {"property":"Is","value":"Flatbed"}
+        - in: query
+          name: resAssistant
+          schema:
+            type: string
+          description: >
+            JSON string to filter by responsible assistant. Example: {"property":"Contains","value":"Jane"}
+        - in: query
+          name: resDispatcher
+          schema:
+            type: string
+          description: >
+            JSON string to filter by responsible dispatcher. Example: {"property":"Contains","value":"Doe"}
+        - in: query
+          name: maintenanceDate
+          schema:
+            type: string
+            format: date
+          description: >
+            JSON string to filter by maintenance date. Example: {"property":"Is","value":"2023-01-01"}
+        - in: query
+          name: regEnd
+          schema:
+            type: string
+            format: date
+          description: >
+            JSON string to filter by registration end date. Example: {"property":"Is","value":"2025-12-31"}
+        - in: query
+          name: vin
+          schema:
+            type: string
+          description: >
+            JSON string to filter by vehicle identification number (VIN). Example: {"property":"Starts with","value":"1HG"}
+        - in: query
+          name: licensePlate
+          schema:
+            type: string
+          description: >
+            JSON string to filter by license plate. Example: {"property":"Ends with","value":"XYZ"}
+        - in: query
+          name: maxLbs
+          schema:
+            type: number
+          description: >
+            JSON string to filter by maximum lbs. Example: {"property":"Is","value":50000}
+        - in: query
+          name: document
+          schema:
+            type: string
+          description: >
+            JSON string to filter by document names in truck's documents. Example: {"property":"Contains","value":".pdf"}
+      responses:
+        '200':
+          description: Successful retrieval of trucks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Truck'
+        '400':
+          description: Invalid parameter format
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Invalid parameter format"
+        '500':
+          description: Error retrieving trucks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Error retrieving trucks"
+    put:
+      tags:
+        - Truck
+      summary: Update trucks
+      description: |
+        Updates multiple trucks. Expects an array of truck objects with their respective IDs and new data.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  truckNo:
+                    type: string
+                  status:
+                    type: number
+                  carrierId:
+                    type: string
+                  makeModel:
+                    type: string
+                  vin:
+                    type: string
+                  manuYear:
+                    type: string
+                  licensePlate:
+                    type: string
+                  maintenanceDate:
+                    type: string
+                    format: date
+                  regEnd:
+                    type: string
+                    format: date
+                  type:
+                    type: string
+                  resAssistant:
+                    type: string
+                  resDispatcher:
+                    type: string
+                  maxLbs:
+                    type: number
+                  policy:
+                    type: string
+                  driverId:
+                    type: string
+                  teleGroup:
+                    type: string
+                  notes:
+                    type: string
+                  documents:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Document'
+      responses:
+        '200':
+          description: Trucks updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: "Trucks updated successfully"
+                      updated_trucks:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Truck'
+        '404':
+          description: One or more trucks not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: "Some trucks were not found"
+                      not_found_ids:
+                        type: array
+                        items:
+                          type: string
+                      updated_trucks:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Truck'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Error updating trucks"
+  /api/v1/truck/:
+    post:
+      tags:
+        - Truck
+      summary: Create truck
+      description: |
+        Register a new truck in the database by providing detailed specifications and documentation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Truck'
+      responses:
+        '200':
+          description: Truck created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    $ref: '#/components/schemas/Truck'
+        '500':
+          description: Error creating truck
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Error creating truck"
+
+  /api/v1/truck/{id}:
+    get:
+      tags:
+        - Truck
+      summary: Retrieve truck by ID
+      description: |
+        Access detailed truck information by specifying the truck's unique ID for maintenance records and more.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Truck found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    $ref: '#/components/schemas/Truck'
+        '404':
+          description: Truck not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Truck not found"
+
+    delete:
+      tags:
+        - Truck
+      summary: Delete truck by ID
+      description: |
+        Remove a truck record using the truck's ID to ensure the database only reflects current assets.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Truck deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: object
+                    properties:
+                      deleted_id:
+                        type: string
+        '404':
+          description: Truck not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Truck not found"
+
+  /api/v1/trailers:
+    get:
+      tags:
+        - Trailer
+      summary: >
+        Retrieve trailers
+      description: |
+        Retrieve trailers with advanced filtering options.<br><br>
+        Supported operations for all query parameters:<br>
+        ["Is", "Is not", "Contains", "Does not contain", "Starts with", "Ends with", "Is empty", "Is not empty"]<br><br>
+        Indexes for status:<br>
+        ["Active"=1, "Suspended", "Inactive"]
+      parameters:
+        - in: query
+          name: trailerNo
+          schema:
+            type: string
+          description: >
+            JSON string to filter by trailer number. Example: {"property":"Contains","value":"1234"}
+        - in: query
+          name: carrier
+          schema:
+            type: string
+          description: >
+            JSON string to filter by carrier ID. Example: {"property":"Is","value":"5678"}
+        - in: query
+          name: status
+          schema:
+            type: string
+          description: >
+            JSON string to filter by trailer status. Example: {"property":"Is","value":1}
+        - in: query
+          name: type
+          schema:
+            type: string
+          description: >
+            JSON string to filter by trailer type. Example: {"property":"Is","value":"Flatbed"}
+        - in: query
+          name: maintenanceDate
+          schema:
+            type: string
+            format: date
+          description: >
+            JSON string to filter by maintenance date. Example: {"property":"Is","value":"2023-01-01"}
+        - in: query
+          name: regEnd
+          schema:
+            type: string
+            format: date
+          description: >
+            JSON string to filter by registration end date. Example: {"property":"Is","value":"2025-12-31"}
+        - in: query
+          name: vin
+          schema:
+            type: string
+          description: >
+            JSON string to filter by vehicle identification number (VIN). Example: {"property":"Starts with","value":"1HG"}
+        - in: query
+          name: licensePlate
+          schema:
+            type: string
+          description: >
+            JSON string to filter by license plate. Example: {"property":"Ends with","value":"XYZ"}
+        - in: query
+          name: maxLbs
+          schema:
+            type: number
+          description: >
+            JSON string to filter by maximum lbs. Example: {"property":"Is","value":20000}
+        - in: query
+          name: document
+          schema:
+            type: string
+          description: >
+            JSON string to filter by document names in trailer's documents. Example: {"property":"Contains","value":".pdf"}
+      responses:
+        '200':
+          description: Successful retrieval of trailers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Trailer'
+        '400':
+          description: Invalid parameter format
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Invalid parameter format"
+        '500':
+          description: Error retrieving trailers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Error retrieving trailers"
+    put:
+      tags:
+        - Trailer
+      summary: Update trailers
+      description: |
+        Updates multiple trailers. Expects an array of trailer objects with their respective IDs and new data.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  trailerNo:
+                    type: string
+                  status:
+                    type: number
+                  carrierId:
+                    type: string
+                  tin:
+                    type: string
+                  vin:
+                    type: string
+                  manuYear:
+                    type: string
+                  licensePlate:
+                    type: string
+                  maintenanceDate:
+                    type: string
+                    format: date
+                  regEnd:
+                    type: string
+                    format: date
+                  type:
+                    type: string
+                  dimensions:
+                    type: string
+                  axieConf:
+                    type: string
+                  maxLbs:
+                    type: number
+                  maxFt:
+                    type: number
+                  policy:
+                    type: string
+                  notes:
+                    type: string
+                  documents:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Document'
+      responses:
+        '200':
+          description: Trailers updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: "Trailers updated successfully"
+                      updated_trailers:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Trailer'
+        '404':
+          description: One or more trailers not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: "Some trailers were not found"
+                      not_found_ids:
+                        type: array
+                        items:
+                          type: string
+                      updated_trailers:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Trailer'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Error updating trailers"
+
+  /api/v1/trailer:
+    post:
+      tags:
+        - Trailer
+      summary: Create trailer
+      description: |
+        Add a new trailer entry with detailed data including type, capacity, and registration information.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Trailer'
+      responses:
+        '200':
+          description: Trailer created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    $ref: '#/components/schemas/Trailer'
+        '500':
+          description: Error creating trailer
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Error creating trailer"
+
+  /api/v1/trailer/{id}:
+    get:
+      tags:
+        - Trailer
+      summary: Retrieve trailer by ID
+      description: |
+        Obtain detailed information about a trailer by using its unique ID for tracking and inventory purposes.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Trailer found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    $ref: '#/components/schemas/Trailer'
+        '404':
+          description: Trailer not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Trailer not found"
+
+    delete:
+      tags:
+        - Trailer
+      summary: Delete trailer by ID
+      description: |
+        Remove a trailer's data from the system by specifying its ID to keep inventory records up to date.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Trailer deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: string
+                    example: "Trailer deleted successfully"
+        '404':
+          description: Trailer not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Trailer not found"        
+
+  /api/v1/warehouses:
+    get:
+      tags:
+        - Warehouse
+      summary: >
+        Retrieve warehouses
+      description: |  
+        Access a comprehensive list of warehouses with filtering options to manage logistics and storage efficiently.<br><br>
+        Supported operations for all query parameters:<br>
+        ["Is", "Is not", "Contains", "Does not contain", "Starts with", "Ends with", "Is empty", "Is not empty"]<br><br>
+        Indexes for status:<br>
+        ["Active"=1, "Suspended", "Inactive"]
+      parameters:
+        - in: query
+          name: name
+          schema:
+            type: string
+          description: >
+            JSON string to filter by warehouse name. Example: {"property":"Contains","value":"Central"}
+        - in: query
+          name: status
+          schema:
+            type: string
+          description: >
+            JSON string to filter by warehouse status. Example: {"property":"Is","value":1}
+        - in: query
+          name: address
+          schema:
+            type: string
+          description: >
+            JSON string to filter by warehouse address. Example: {"property":"Contains","value":"Springfield"}
+        - in: query
+          name: workingHours
+          schema:
+            type: string
+          description: >
+            JSON string to filter by working hours. Example: {"property":"Contains","value":"9:00"}
+      responses:
+        '200':
+          description: Successful retrieval of warehouses
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Warehouse'
+        '400':
+          description: Invalid parameter format
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Invalid parameter format"
+        '500':
+          description: Error retrieving warehouses
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Error retrieving warehouses"
+    put:
+      tags:
+        - Warehouse
+      summary: Update warehouses
+      description: |
+        Updates multiple warehouses. Expects an array of warehouse objects with their respective IDs and new data.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  status:
+                    type: number
+                  address:
+                    type: string
+                  workingHours:
+                    items:
+                      type: string
+                  notes:
+                    type: string
+                  contacts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ContactInfo'
+      responses:
+        '200':
+          description: Warehouses updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: "Warehouses updated successfully"
+                      updated_warehouses:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Warehouse'
+        '404':
+          description: One or more warehouses not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: "Some warehouses were not found"
+                      not_found_ids:
+                        type: array
+                        items:
+                          type: string
+                      updated_warehouses:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Warehouse'
+        '500':
+          description: Error updating warehouses
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Error updating warehouses"
+  /api/v1/warehouse:
+    post:
+      tags:
+        - Warehouse
+      summary: Create warehouse
+      description: |
+        Establish a new warehouse with complete details about its location, capacity, and operational hours.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Warehouse'
+      responses:
+        '200':
+          description: Warehouse created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    $ref: '#/components/schemas/Warehouse'
+        '500':
+          description: Error creating warehouse
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Error creating warehouse"
+
+  /api/v1/warehouse/{id}:
+    get:
+      tags:
+        - Warehouse
+      summary: Retrieve warehouse by ID
+      description: |
+        Access specific warehouse information by ID to understand storage space and operational metrics.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Warehouse found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    $ref: '#/components/schemas/Warehouse'
+        '404':
+          description: Warehouse not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Warehouse not found"
+
+    delete:
+      tags:
+        - Warehouse
+      summary: Delete warehouse by ID
+      description: |
+        Remove a warehouse record from the database by using its unique ID for accurate operational tracking.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Warehouse deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: string
+                    example: "Warehouse deleted successfully"
+        '404':
+          description: Warehouse not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Warehouse not found"
+
+  /api/v1/owners:
+    get:
+      tags:
+        - Owner
+      summary: Retrieve owners
+      description: |
+        Acquire a list of owners with detailed filtering options to manage and coordinate relationships effectively.<br><br>
+        Supported operations for all query parameters:<br>
+        ["Is", "Is not", "Contains", "Does not contain", "Starts with", "Ends with", "Is empty", "Is not empty"]<br><br>
+        Indexes for status:<br>
+        ["Active"=1, "Suspended", "Inactive"]
+      parameters:
+        - in: query
+          name: name
+          schema:
+            type: string
+          description: >
+            JSON string to filter by owner name. Example: {"property":"Contains","value":"Trucking"}
+        - in: query
+          name: userName
+          schema:
+            type: string
+          description: >
+            JSON string to filter by user name. Example: {"property":"Contains","value":"McCoy"}
+        - in: query
+          name: status
+          schema:
+            type: string
+          description: >
+            JSON string to filter by owner status. Example: {"property":"Is","value":1}
+      responses:
+        '200':
+          description: Successful retrieval of owners
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Owner'
+        '400':
+          description: Invalid parameter format
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Invalid parameter format"
+        '500':
+          description: Error retrieving owners
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Error retrieving owners"
+    put:
+      tags:
+        - Owner
+      summary: Update owners
+      description: |
+        Updates multiple owners. Expects an array of owner objects with their respective IDs and new data.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  userName:
+                    type: string
+                  status:
+                    type: number
+                  posPlanner:
+                    type: string
+                  colorPlanner:
+                    type: string
+      responses:
+        '200':
+          description: Owners updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: "Owners updated successfully"
+                      updated_owners:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Owner'
+        '404':
+          description: One or more owners not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: "Some owners were not found"
+                      not_found_ids:
+                        type: array
+                        items:
+                          type: string
+                      updated_owners:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Owner'
+        '500':
+          description: Error updating owners
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Error updating owners"
+
+  /api/v1/owner:
+    post:
+      tags:
+        - Owner
+      summary: Create an owner
+      description: |
+        Add a new owner to the system by providing detailed information including 
+        name, user information, and status.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Owner'
+      responses:
+        '200':
+          description: Owner created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    $ref: '#/components/schemas/Owner'
+        '500':
+          description: Error creating owner
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Error creating owner"
+
+  /api/v1/owner/{id}:
+    get:
+      tags:
+        - Owner
+      summary: Retrieve owner by ID
+      description: |
+        Access the details of a specific owner by providing the owner's unique ID. 
+        This endpoint returns all associated data for the specified owner.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Owner found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    $ref: '#/components/schemas/Owner'
+        '404':
+          description: Owner not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Owner not found"
+
+    delete:
+      tags:
+        - Owner
+      summary: Delete owner by ID
+      description: |
+        Remove an owner from the system by specifying the owner's unique ID. 
+        This operation is irreversible and will permanently erase the owner's data.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Owner deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: string
+                    example: "Owner deleted successfully"
+        '404':
+          description: Owner not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Owner not found"
+  /api/v1/filter/fields:
+    get:
+      tags:
+        - Filter
+      summary: Retrieve filter fields
+      description: Fetches all documents from the FilterField collection.
+      responses:
+        '200':
+          description: Successful retrieval of filter fields
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FilterField'
+        '500':
+          description: Error retrieving filter fields
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Error message"
+  /api/v1/filters:
+    get:
+      tags:
+        - Filter
+      summary: Retrieve filters by userId and pageIndex
+      description: |
+        Access user-specific filters to streamline data retrieval processes according to personal preferences.<br>
+        pageIndex [brokers=1, facilities, carriers, drivers, trucks, trailers, warehouses, owners].
+      parameters:
+        - in: query
+          name: userId
+          required: true
+          schema:
+            type: string
+          description: The userId to filter filters by. Example: "james1011"
+        - in: query
+          name: pageIndex
+          schema:
+            type: number
+          description: The pageIndex to filter filters by. Example: 1
+      responses:
+        '200':
+          description: Successful retrieval of filters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Filter'
+        '404':
+          description: User filters not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Filters not found for the given userId"
+        '500':
+          description: Error retrieving filters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Error retrieving filters"
+  /api/v1/filter:
+    post:
+      tags:
+        - Filter
+      summary: Create filter
+      description: |
+        Develop new custom filters to enhance data management and retrieval through precise query definitions.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Filter'
+      responses:
+        '201':
+          description: Filter created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    $ref: '#/components/schemas/Filter'
+        '500':
+          description: Error creating filter
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Error message"
+
+  /api/v1/filter/{id}:
+    delete:
+      tags:
+        - Filter
+      summary: Delete filter by ID
+      description: |
+        Eliminate a custom filter from the system by specifying its unique ID for consistent data management.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Filter deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: string
+                    example: "Filter deleted successfully"
+        '404':
+          description: Filter not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Filter not found"
+        '500':
+          description: Error deleting filter
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Error message"
+
+  /api/v1/shortlist/carriers:
+    get:
+      tags:
+        - Shortlist
+      summary: Retrieve carrier list for drivers
+      description: |
+        Access a shortened list of carriers related to drivers for improved route coordination and scheduling.
+      responses:
+        '200':
+          description: Carrier found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+        '404':
+          description: Carrier not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Carrier not found"  
+
+  /api/v1/shortlist/trucks:
+    get:
+      tags:
+        - Shortlist
+      summary: Retrieve truck list
+      description: |
+        Access a summarized list of trucks for quick reference and logistics planning.
+      responses:
+        '200':
+          description: Truck found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+        '404':
+          description: Truck not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Truck not found"
+
+  /api/v1/shortlist/trailers:
+    get:
+      tags:
+        - Shortlist
+      summary: Retrieve trailer list
+      description: |
+        Fetch a summarized list of trailers for efficient resource management.
+      responses:
+        '200':
+          description: Trailer found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  response:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+        '404':
+          description: Trailer not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  response:
+                    type: string
+                    example: "Trailer not found"
+
+components:
+  schemas:
+    BrokerPage:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          example: "Louis Vuiton"
+        email:
+          type: string
+          example: "debbie.baker@example.com"
+        phone:
+          type: string
+          example: "(303) 555-0105"
+        mc:
+          type: string
+          example: 439799
+        rating:
+          type: integer
+          example: 4
+        brokers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Broker'
+        reviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/Review'
+
+    Broker:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "John Doe"
+        email:
+          type: string
+          example: "john@gmail.com"
+        phone:
+          type: string
+          example: "123-456-7890"
+        regular:
+          type: bool
+          example: true
+
+    Facility:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        address:
+          type: string
+        workingHours:
+          type: array
+          items:
+            type: string
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContactInfo'
+        googleReviews:
+          type: number
+        ourComments:
+          type: number
+        googleReviewDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/Review'
+        ourCommentsDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/Review'
+    Carrier:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        status:
+          type: number
+        owner:
+          type: string          
+        trucks:
+          type: array
+          items:
+            type: string
+        trailers:
+          type: array
+          items:
+            type: string
+        mc:
+          type: string
+        dot:
+          type: string
+        scac:
+          type: string
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContactInfo'
+        carrierPacket:
+          type: array
+          items:
+            $ref: '#/components/schemas/Document'
+    Driver:
+      type: object
+      properties:
+        id:
+          type: string
+        fullName:
+          type: string
+        address:
+          type: string
+        status:
+          type: number
+        trucks:
+          type: array
+          items:
+            type: string
+        carrierId:
+          type: string
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContactInfo'
+        type:
+          type: number
+        email:
+          type: string
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/Document'
+        date:
+          type: string
+          format: date
+        notes:
+          type: string
+        endorsements:
+          type: array
+          items:
+            type: number
+        cellPhone:
+          type: string
+        trackingPhone:
+          type: string
+    Truck:
+      type: object
+      properties:
+        id:
+          type: string
+        truckNo:
+          type: string
+        status:
+          type: number
+        carrierId:
+          type: string
+        makeModel:
+          type: string
+        vin:
+          type: string
+        manuYear:
+          type: string
+        licensePlate:
+          type: string
+        maintenanceDate:
+          type: string
+          format: date
+        regEnd:
+          type: string
+          format: date
+        type:
+          type: string
+        resAssistant:
+          type: string
+        resDispatcher:
+          type: string
+        maxLbs:
+          type: number
+        policy:
+          type: string
+        driverId:
+          type: string
+        teleGroup:
+          type: string
+        notes:
+          type: string
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/Document'
+    Trailer:
+      type: object
+      properties:
+        id:
+          type: string
+        trailerNo:
+          type: string
+          example: "TR1234"
+        status:
+          type: number
+          example: 1
+        carrierId:
+          type: string
+          example: "123456"
+        tin:
+          type: string
+          example: "TIN123"
+        vin:
+          type: string
+          example: "1HGBH41JXMN109186"
+        manuYear:
+          type: string
+          example: "2015"
+        licensePlate:
+          type: string
+          example: "XYZ123"
+        maintenanceDate:
+          type: string
+          format: date
+        regEnd:
+          type: string
+          format: date
+        type:
+          type: string
+          example: "Flatbed"
+        dimensions:
+          type: string
+          example: "40ft x 8ft"
+        axieConf:
+          type: string
+          example: "2-axle"
+        maxLbs:
+          type: number
+          example: 20000
+        maxFt:
+          type: number
+          example: 40
+        policy:
+          type: string
+        notes:
+          type: string
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/Document'
+    Owner:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          example: "TNO Trucking"
+        userName:
+          type: string
+          example: "Arience McCoy"
+        status:
+          type: number
+          example: 1
+        posPlanner:
+          type: string
+          example: "#2"
+        colorPlanner:
+          type: string
+          example: "#00129A"
+    Warehouse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          example: "Springfield Central"
+        status:
+          type: number
+          example: 1
+        address:
+          type: string
+          example: "1234 Elm St, Springfield, IL 62704"
+        workingHours:
+          type: array
+          example: ["12:00", "16:00"]
+        notes:
+          type: string
+          example: "Detailed notes about the warehouse"
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContactInfo'                      
+    ContactInfo:
+      type: object
+      properties:
+        name:
+          type: string
+        position:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+    Document:
+      type: object
+      properties:
+        name:
+          type: string
+        url:
+          type: string
+    Review:
+      type: object
+      properties:
+        name:
+          type: string
+        date:
+          type: string
+        rating:
+          type: number
+        text:
+          type: string
+    Filter:
+      type: object
+      properties:
+        userId:
+          type: string
+          example: "james1011"
+        pageIndex:
+          type: number
+          example: 1
+        type:
+          type: string
+          example: "String"
+        name:
+          type: string
+          example: "broker_name"
+        property:
+          type: string
+          example: "StartsWith"
+        value:
+          type: string
+          example: "John"
+    FilterField:
+      type: object
+      properties:
+        pageIndex:
+          type: number
+          example: 1
+        name:
+          type: string
+          example: "example_name"
+        type:
+          type: string
+          example: "String"
