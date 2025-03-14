@@ -23,7 +23,7 @@ exports.getPDFList = async (req, res) => {
 
 exports.downloadPDF = async (req, res) => {
   try {
-    const { fileKey } = req.body;
+    const fileKey = req.query.fileKey;
 
     if (!fileKey) {
       return res.status(400).send('fileKey is required');

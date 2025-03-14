@@ -10,7 +10,7 @@ exports.getStocks = async (req, res) => {
     }
 
     res.status(200).json(resData);
-  } catch {
+  } catch (error) {
     const resData = {
       status: false,
       response: error.message
