@@ -1,9 +1,10 @@
-const Stock = require('../models/detail');
 const CryptoJS = require('crypto-js');
+const pool = require('../connection');
 
 exports.getTopStocks = async (req, res) => {
   try {
-    const details = await Stock.find({});
+    const query = `SELECT * FROM top_ideas`;
+    const [details] = await pool.query(query);
 
     const resData = {
       status: true,
@@ -28,7 +29,8 @@ exports.getTopStockById = async (req, res) => {
     const bytes = CryptoJS.AES.decrypt(encrypt_id, secretKey);
     const stock_id = bytes.toString(CryptoJS.enc.Utf8);
 
-    const details = await Stock.findOne({_id: stock_id});
+    const query = `SELECT * FROM top_ideas WHERE id = ${stock_id}`;
+    const [details] = await pool.query(query);
 
     const resData = {
       status: true,
