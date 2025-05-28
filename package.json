@@ -24,8 +24,10 @@
     "mongoose": "^8.7.2",
     "mysql2": "^3.14.1",
     "query-string": "^9.1.1",
+    "stream": "^0.0.3",
     "stripe": "^17.7.0",
     "swagger-ui-express": "^5.0.1",
+    "xlsx": "^0.18.5",
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
