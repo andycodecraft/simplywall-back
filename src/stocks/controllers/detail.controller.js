@@ -3,7 +3,7 @@ const pool = require('../connection');
 
 exports.getTopStocks = async (req, res) => {
   try {
-    const query = `SELECT * FROM top_ideas`;
+    const query = 'SELECT * FROM top_ideas ORDER BY `order`';
     const [details] = await pool.query(query);
 
     const resData = {

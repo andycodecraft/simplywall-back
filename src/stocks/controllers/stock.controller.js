@@ -1,4 +1,3 @@
-const Stock = require('../models/stock');
 const pool = require('../connection');
 
 exports.getStocks = async (req, res) => {
