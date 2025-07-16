@@ -2,7 +2,7 @@ const pool = require('../connection');
 
 exports.getStocks = async (req, res) => {
   try {
-    const query = 'SELECT * FROM all_ideas'
+    const query = 'SELECT * FROM stock_pitches'
     const [stocks] = await pool.query(query);
 
     const resData = {
